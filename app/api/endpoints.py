@@ -21,13 +21,7 @@ def create_agent(agent: schemas.AgentCreate, db: Session = Depends(get_db)):
     db.add(db_api_key)
     db.commit()
     db.refresh(db_api_key)
-    
-    return schemas.AgentWithAPIKey(
-        agent_id=db_agent.agent_id,
-        agent_name=db_agent.agent_name,
-        created_at=db_agent.created_at,
-        api_key=db_api_key.key
-    )
+    return schemas.AgentWithAPIKey(**db_agent.__dict__, api_key=db_api_key.key)
 
 @router.get("/api/agents/{agent_id}", response_model=schemas.Agent)
 def read_agent(agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
@@ -38,12 +32,7 @@ def read_agent(agent_id: int, db: Session = Depends(get_db), api_key: str = Depe
 
 @router.post("/api/agents/{agent_id}/twitter_accounts/", response_model=schemas.TwitterAccount)
 def create_twitter_account(agent_id: int, account: schemas.TwitterAccountCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
-    db_account = models.TwitterAccount(
-        agent_id=agent_id,
-        twitter_handle=account.twitter_handle,
-        username=account.username,
-        twitter_user_id=account.twitter_user_id
-    )
+    db_account = models.TwitterAccount(**account.dict(), agent_id=agent_id)
     db.add(db_account)
     db.commit()
     db.refresh(db_account)
@@ -58,16 +47,7 @@ def get_twitter_account(twitter_user_id: str, db: Session = Depends(get_db), api
 
 @router.post("/api/agents/{agent_id}/accounts/{twitter_user_id}/tweets/", response_model=schemas.Tweet)
 def create_tweet(agent_id: int, twitter_user_id: str, tweet: schemas.TweetCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
-    db_tweet = models.Tweet(
-        twitter_user_id=twitter_user_id,
-        user_name=tweet.user_name,
-        text=tweet.text,
-        created_at=tweet.created_at,
-        view_count=tweet.view_count,
-        retweet_count=tweet.retweet_count,
-        quote_count=tweet.quote_count,
-        view_count_state=tweet.view_count_state
-    )
+    db_tweet = models.Tweet(**tweet.dict(), twitter_user_id=twitter_user_id)
     db.add(db_tweet)
     db.commit()
     db.refresh(db_tweet)
@@ -75,6 +55,11 @@ def create_tweet(agent_id: int, twitter_user_id: str, tweet: schemas.TweetCreate
 
 @router.post("/api/agents/{agent_id}/accounts/{twitter_user_id}/tweets/{tweet_id}/interactions/", response_model=schemas.Interaction)
 def create_interaction(agent_id: int, twitter_user_id: str, tweet_id: int, interaction: schemas.InteractionCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    # Check if the tweet exists
+    db_tweet = db.query(models.Tweet).filter(models.Tweet.tweet_id == tweet_id).first()
+    if db_tweet is None:
+        raise HTTPException(status_code=404, detail="Tweet not found")
+    
     db_interaction = models.Interaction(tweet_id=tweet_id, agent_id=agent_id, interaction_type=interaction.interaction_type)
     db.add(db_interaction)
     db.commit()
@@ -87,3 +72,10 @@ def read_tweet(tweet_id: int, db: Session = Depends(get_db), api_key: str = Depe
     if db_tweet is None:
         raise HTTPException(status_code=404, detail="Tweet not found")
     return db_tweet
+
+@router.get("/api/interactions/{interaction_id}", response_model=schemas.Interaction)
+def read_interaction(interaction_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_interaction = db.query(models.Interaction).filter(models.Interaction.interaction_id == interaction_id).first()
+    if db_interaction is None:
+        raise HTTPException(status_code=404, detail="Interaction not found")
+    return db_interaction
