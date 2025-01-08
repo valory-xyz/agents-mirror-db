@@ -31,29 +31,33 @@ class AgentWithAPIKey(Agent):
 
 class TwitterAccountBase(BaseModel):
     twitter_handle: str
+    username: str
+    twitter_user_id: str
 
 class TwitterAccountCreate(TwitterAccountBase):
     pass
 
 class TwitterAccount(TwitterAccountBase):
-    account_id: int
-    agent_id: int
     created_at: datetime
 
     class Config:
         from_attributes = True
 
 class TweetBase(BaseModel):
-    content: str
+    user_name: str
+    text: str
+    created_at: datetime
+    view_count: int
+    retweet_count: int
+    quote_count: int
+    view_count_state: str
 
 class TweetCreate(TweetBase):
     pass
 
 class Tweet(TweetBase):
     tweet_id: int
-    account_id: int
-    created_at: datetime
-    updated_at: datetime
+    twitter_user_id: str
 
     class Config:
         from_attributes = True

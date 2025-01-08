@@ -22,19 +22,24 @@ class Agent(Base):
 
 class TwitterAccount(Base):
     __tablename__ = 'twitter_accounts'
-    account_id = Column(Integer, primary_key=True, index=True)
+    twitter_user_id = Column(String, primary_key=True, index=True)
     agent_id = Column(Integer, ForeignKey('agents.agent_id'))
     twitter_handle = Column(String, index=True)
+    username = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     agent = relationship("Agent", back_populates="twitter_accounts")
 
 class Tweet(Base):
     __tablename__ = 'tweets'
     tweet_id = Column(Integer, primary_key=True, index=True)
-    account_id = Column(Integer, ForeignKey('twitter_accounts.account_id'))
-    content = Column(String)
+    twitter_user_id = Column(String, ForeignKey('twitter_accounts.twitter_user_id'))
+    user_name = Column(String)
+    text = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow)
+    view_count = Column(Integer)
+    retweet_count = Column(Integer)
+    quote_count = Column(Integer)
+    view_count_state = Column(String)
     account = relationship("TwitterAccount", back_populates="tweets")
 
 class Interaction(Base):
@@ -55,7 +60,7 @@ class APIKey(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     agent = relationship("Agent", back_populates="api_keys")
 
-Agent.twitter_accounts = relationship("TwitterAccount", order_by=TwitterAccount.account_id, back_populates="agent")
+Agent.twitter_accounts = relationship("TwitterAccount", order_by=TwitterAccount.twitter_user_id, back_populates="agent")
 TwitterAccount.tweets = relationship("Tweet", order_by=Tweet.tweet_id, back_populates="account")
 Tweet.interactions = relationship("Interaction", order_by=Interaction.interaction_id, back_populates="tweet")
 Agent.interactions = relationship("Interaction", order_by=Interaction.interaction_id, back_populates="agent")
