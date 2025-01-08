@@ -18,6 +18,7 @@ class Agent(Base):
     agent_id = Column(Integer, primary_key=True, index=True)
     agent_name = Column(String, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    api_keys = relationship("APIKey", back_populates="agent")
 
 class TwitterAccount(Base):
     __tablename__ = 'twitter_accounts'
@@ -45,6 +46,14 @@ class Interaction(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     tweet = relationship("Tweet", back_populates="interactions")
     agent = relationship("Agent", back_populates="interactions")
+
+class APIKey(Base):
+    __tablename__ = 'api_keys'
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, index=True)
+    agent_id = Column(Integer, ForeignKey('agents.agent_id'))
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    agent = relationship("Agent", back_populates="api_keys")
 
 Agent.twitter_accounts = relationship("TwitterAccount", order_by=TwitterAccount.account_id, back_populates="agent")
 TwitterAccount.tweets = relationship("Tweet", order_by=Tweet.tweet_id, back_populates="account")
