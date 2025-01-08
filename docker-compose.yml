@@ -1,27 +1,28 @@
+version: "3.8"
+
 services:
   db:
-    image: postgres:16-alpine
-    restart: always
+    image: postgres:13
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin_passw0rd
       POSTGRES_DB: pg_database
+    ports:
+      - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-    network_mode: host # Use host network mode
+      - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: pgAdmin@mail.com
-      PGADMIN_DEFAULT_PASSWORD: new_pgAdmin_secr3t
+  web:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 80 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:80"
     depends_on:
       - db
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    network_mode: host # Use host network mode
+    environment:
+      - SQLALCHEMY_DATABASE_URL=postgresql://admin:admin_passw0rd@db:5432/pg_database
 
 volumes:
-  db_data:
-  pgadmin-data:
+  postgres_data:
