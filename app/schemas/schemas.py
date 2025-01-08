@@ -23,6 +23,12 @@ class Agent(AgentBase):
     class Config:
         from_attributes = True
 
+class AgentWithAPIKey(Agent):
+    api_key: str
+
+    class Config:
+        from_attributes = True
+
 class TwitterAccountBase(BaseModel):
     twitter_handle: str
 
@@ -62,6 +68,20 @@ class Interaction(InteractionBase):
     interaction_id: int
     tweet_id: int
     agent_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class APIKeyBase(BaseModel):
+    agent_id: int
+
+class APIKeyCreate(APIKeyBase):
+    pass
+
+class APIKey(APIKeyBase):
+    id: int
+    key: str
     created_at: datetime
 
     class Config:
