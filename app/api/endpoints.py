@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
+from typing import List
 from ..models import models
 from ..schemas import schemas
 from ..db import get_db
@@ -87,3 +88,17 @@ def read_tweet(tweet_id: int, db: Session = Depends(get_db), api_key: str = Depe
     if db_tweet is None:
         raise HTTPException(status_code=404, detail="Tweet not found")
     return db_tweet
+
+@router.get("/api/interactions/{interaction_id}", response_model=schemas.Interaction)
+def get_interaction(interaction_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_interaction = db.query(models.Interaction).filter(models.Interaction.interaction_id == interaction_id).first()
+    if db_interaction is None:
+        raise HTTPException(status_code=404, detail="Interaction not found")
+    return db_interaction
+
+@router.get("/api/twitter_accounts/{twitter_user_id}/interactions/", response_model=List[schemas.Interaction])
+def get_interactions_by_twitter_user_id(twitter_user_id: str, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_interactions = db.query(models.Interaction).join(models.Tweet).filter(models.Tweet.twitter_user_id == twitter_user_id).all()
+    if not db_interactions:
+        raise HTTPException(status_code=404, detail="No interactions found for this Twitter user ID")
+    return db_interactions
