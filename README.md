@@ -99,14 +99,6 @@ curl -X POST "http://127.0.0.1:8000/api/agents/" -H "Content-Type: application/j
 curl -X POST "http://127.0.0.1:8000/api/agents/1/twitter_accounts/" -H "Content-Type: application/json" -d '{"username": "johndoe", "name": "John Doe", "twitter_user_id": "12345"}'
 ```
 
-## Running Tests
-
-To run the tests, use the following command:
-
-```bash
-pytest
-```
-
 ## License
 
 This project is licensed under the MIT License.
