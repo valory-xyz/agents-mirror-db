@@ -1,11 +1,13 @@
+import datetime
 from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from ..models import models
 from ..schemas import schemas
 from ..db import get_db
 from ..dependencies import get_api_key
 from ..utils import generate_api_key
+from ..models.models import InteractionType
 
 router = APIRouter()
 
@@ -41,8 +43,8 @@ def read_agent(agent_id: int, db: Session = Depends(get_db), api_key: str = Depe
 def create_twitter_account(agent_id: int, account: schemas.TwitterAccountCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
     db_account = models.TwitterAccount(
         agent_id=agent_id,
-        twitter_handle=account.twitter_handle,
-        username=account.username,
+        username=account.username,  # Changed from twitter_handle to username
+        name=account.name,  # Changed from username to name
         twitter_user_id=account.twitter_user_id
     )
     db.add(db_account)
@@ -63,20 +65,42 @@ def create_tweet(agent_id: int, twitter_user_id: str, tweet: schemas.TweetCreate
         twitter_user_id=twitter_user_id,
         user_name=tweet.user_name,
         text=tweet.text,
-        created_at=tweet.created_at,
-        view_count=tweet.view_count,
-        retweet_count=tweet.retweet_count,
-        quote_count=tweet.quote_count,
-        view_count_state=tweet.view_count_state
+        created_at=tweet.created_at
     )
     db.add(db_tweet)
     db.commit()
     db.refresh(db_tweet)
     return db_tweet
 
-@router.post("/api/agents/{agent_id}/accounts/{twitter_user_id}/tweets/{tweet_id}/interactions/", response_model=schemas.Interaction)
-def create_interaction(agent_id: int, twitter_user_id: str, tweet_id: int, interaction: schemas.InteractionCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
-    db_interaction = models.Interaction(tweet_id=tweet_id, agent_id=agent_id, interaction_type=interaction.interaction_type)
+@router.post("/api/agents/{agent_id}/accounts/{twitter_user_id}/interactions/", response_model=schemas.Interaction)
+def create_interaction(agent_id: int, twitter_user_id: str, interaction: schemas.InteractionCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    if interaction.interaction_type == InteractionType.follow:
+        if interaction.user_id is None:
+            raise HTTPException(status_code=400, detail="user_id is required for follow interactions")
+    else:
+        if interaction.tweet_id is None:
+            raise HTTPException(status_code=400, detail="tweet_id is required for non-follow interactions")
+
+    if interaction.tweet_id is not None:
+        db_tweet = db.query(models.Tweet).filter(models.Tweet.tweet_id == interaction.tweet_id).first()
+        if db_tweet is None:
+            db_tweet = models.Tweet(
+                tweet_id=interaction.tweet_id,
+                twitter_user_id=twitter_user_id,
+                user_name="unknown",
+                text="",
+                created_at=datetime.datetime.utcnow()
+            )
+            db.add(db_tweet)
+            db.commit()
+            db.refresh(db_tweet)
+
+    db_interaction = models.Interaction(
+        tweet_id=interaction.tweet_id,
+        user_id=interaction.user_id,
+        agent_id=agent_id,
+        interaction_type=interaction.interaction_type
+    )
     db.add(db_interaction)
     db.commit()
     db.refresh(db_interaction)
