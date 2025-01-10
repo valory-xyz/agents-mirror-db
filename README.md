@@ -35,7 +35,7 @@ agents_fun_mirror_db/
 ### Prerequisites
 
 - Python 3.8+
-- PostgreSQL 
+- PostgreSQL
 
 ### Installation
 
@@ -59,13 +59,7 @@ agents_fun_mirror_db/
    pip install -r requirements.txt
    ```
 
-4. Set up the database:
-
-   ```bash
-   alembic upgrade head
-   ```
-
-5. Run the application:
+4. Run the application:
 
    ```bash
    uvicorn app.main:app --reload
