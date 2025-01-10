@@ -62,6 +62,7 @@ def get_twitter_account(twitter_user_id: str, db: Session = Depends(get_db), api
 @router.post("/api/agents/{agent_id}/accounts/{twitter_user_id}/tweets/", response_model=schemas.Tweet)
 def create_tweet(agent_id: int, twitter_user_id: str, tweet: schemas.TweetCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
     db_tweet = models.Tweet(
+        tweet_id=tweet.tweet_id,  # Use the provided tweet_id if available
         twitter_user_id=twitter_user_id,
         user_name=tweet.user_name,
         text=tweet.text,

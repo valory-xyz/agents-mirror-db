@@ -49,7 +49,7 @@ class TweetBase(BaseModel):
     created_at: datetime
 
 class TweetCreate(TweetBase):
-    pass
+    tweet_id: Optional[int] = None
 
 class Tweet(TweetBase):
     tweet_id: int
