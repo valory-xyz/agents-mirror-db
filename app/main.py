@@ -11,6 +11,6 @@ def on_startup():
     time.sleep(20)
     init_db()
 
-app.add_middleware(LogRequestMiddleware)
+# app.add_middleware(LogRequestMiddleware)
 
 app.include_router(endpoints.router)
