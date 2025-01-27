@@ -127,3 +127,25 @@ def get_interactions_by_twitter_user_id(twitter_user_id: str, db: Session = Depe
     if not db_interactions:
         raise HTTPException(status_code=404, detail="No interactions found for this Twitter user ID")
     return db_interactions
+
+@router.get("/api/agents/{agent_id}/twitter_accounts/", response_model=List[schemas.TwitterAccount])
+def get_twitter_accounts(agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_twitter_accounts = db.query(models.TwitterAccount).filter(models.TwitterAccount.agent_id == agent_id).all()
+    if not db_twitter_accounts:
+        raise HTTPException(status_code=404, detail="No Twitter accounts found for this agent ID")
+    return db_twitter_accounts
+
+@router.get("/api/agents/{agent_id}/twitter_accounts/tweets/", response_model=List[schemas.Tweet])
+def get_latest_tweets(agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_twitter_accounts = db.query(models.TwitterAccount).filter(models.TwitterAccount.agent_id == agent_id).all()
+    if not db_twitter_accounts:
+        raise HTTPException(status_code=404, detail="No Twitter accounts found for this agent ID")
+
+    twitter_user_ids = [account.twitter_user_id for account in db_twitter_accounts]
+    db_tweets = db.query(models.Tweet).filter(models.Tweet.twitter_user_id.in_(twitter_user_ids)).order_by(models.Tweet.created_at.desc()).limit(20).all()
+    
+    if not db_tweets:
+        raise HTTPException(status_code=404, detail="No tweets found for the associated Twitter accounts")
+
+    return db_tweets
+
