@@ -136,7 +136,7 @@ def get_twitter_accounts(agent_id: int, db: Session = Depends(get_db), api_key: 
     return db_twitter_accounts
 
 @router.get("/api/agents/{agent_id}/twitter_accounts/tweets/", response_model=List[schemas.Tweet])
-def get_latest_tweets(agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+def get_latest_tweets_by_agent_id(agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
     db_twitter_accounts = db.query(models.TwitterAccount).filter(models.TwitterAccount.agent_id == agent_id).all()
     if not db_twitter_accounts:
         raise HTTPException(status_code=404, detail="No Twitter accounts found for this agent ID")
@@ -148,4 +148,11 @@ def get_latest_tweets(agent_id: int, db: Session = Depends(get_db), api_key: str
         raise HTTPException(status_code=404, detail="No tweets found for the associated Twitter accounts")
 
     return db_tweets
+
+@router.get("/api/agents/{agent_id}/interactions/", response_model=List[schemas.Interaction])
+def get_interactions_by_agent_id(agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_interactions = db.query(models.Interaction).filter(models.Interaction.agent_id == agent_id).all()
+    if not db_interactions:
+        raise HTTPException(status_code=404, detail="No interactions found for this agent ID")
+    return db_interactions
 
