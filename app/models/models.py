@@ -24,15 +24,15 @@ class TwitterAccount(Base):
     __tablename__ = 'twitter_accounts'
     twitter_user_id = Column(String, primary_key=True, index=True)
     agent_id = Column(Integer, ForeignKey('agents.agent_id'))
-    username = Column(String, index=True)  # Changed from twitter_handle to username
-    name = Column(String)  # Changed from username to name
+    username = Column(String, index=True)  
+    name = Column(String)  
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     agent = relationship("Agent", back_populates="twitter_accounts")
 
 class Tweet(Base):
     __tablename__ = 'tweets'
     tweet_id = Column(BigInteger, primary_key=True, index=True)
-    twitter_user_id = Column(String, ForeignKey('twitter_accounts.twitter_user_id'))
+    twitter_user_id = Column(String, ForeignKey('twitter_accounts.twitter_user_id'), nullable=True)  
     user_name = Column(String)
     text = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -42,7 +42,7 @@ class Tweet(Base):
 class Interaction(Base):
     __tablename__ = 'interactions'
     interaction_id = Column(Integer, primary_key=True, index=True)
-    tweet_id = Column(BigInteger, ForeignKey('tweets.tweet_id'), nullable=True)  # Make tweet_id nullable
+    tweet_id = Column(BigInteger, ForeignKey('tweets.tweet_id'), nullable=True)  
     agent_id = Column(Integer, ForeignKey('agents.agent_id'))
     user_id = Column(String, ForeignKey('twitter_accounts.twitter_user_id'))
     interaction_type = Column(Enum(InteractionType))
