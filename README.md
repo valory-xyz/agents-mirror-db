@@ -69,15 +69,60 @@ agents_fun_mirror_db/
 
 ### API Endpoints
 
+Sure, here is the updated
+
+README.md
+
+to include the new APIs:
+
+````markdown
+# Agents Fun Mirror DB
+
+## Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-repo/agents_fun_mirror_db.git
+   cd agents_fun_mirror_db
+   ```
+````
+
+2. Create a virtual environment:
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+3. Install the dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Run the application:
+
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+## Usage
+
+### API Endpoints
+
 - **Create Agent**: `POST /api/agents/`
 - **Get Agent**: `GET /api/agents/{agent_id}`
 - **Create Twitter Account**: `POST /api/agents/{agent_id}/twitter_accounts/`
 - **Get Twitter Account**: `GET /api/twitter_accounts/{twitter_user_id}`
 - **Create Tweet**: `POST /api/agents/{agent_id}/accounts/{twitter_user_id}/tweets/`
-- **Get Tweet**: `GET /api/tweets/{tweet_id}`
 - **Create Interaction**: `POST /api/agents/{agent_id}/accounts/{twitter_user_id}/interactions/`
+- **Get Tweet**: `GET /api/tweets/{tweet_id}`
 - **Get Interaction**: `GET /api/interactions/{interaction_id}`
 - **Get Interactions by Twitter User ID**: `GET /api/twitter_accounts/{twitter_user_id}/interactions/`
+- **Get Twitter Accounts by Agent ID**: `GET /api/agents/{agent_id}/twitter_accounts/`
+- **Get Latest Tweets by Agent ID**: `GET /api/agents/{agent_id}/twitter_accounts/tweets/`
+- **Get Interactions by Agent ID**: `GET /api/agents/{agent_id}/interactions/`
 
 ### Example Requests
 
@@ -85,7 +130,7 @@ agents_fun_mirror_db/
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/agents/" -H "Content-Type: application/json" -d '{"agent_name": "Agent007"}'
-```
+````
 
 #### Create Twitter Account
 
