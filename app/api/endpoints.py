@@ -90,7 +90,7 @@ def create_interaction(agent_id: int, twitter_user_id: str, interaction: schemas
         if db_tweet is None:
             db_tweet = models.Tweet(
                 tweet_id=interaction.tweet_id,
-                twitter_user_id=twitter_user_id,
+                twitter_user_id=None,
                 user_name="unknown",
                 text="",
                 created_at=datetime.datetime.utcnow()

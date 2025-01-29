@@ -30,8 +30,8 @@ class AgentWithAPIKey(Agent):
         from_attributes = True
 
 class TwitterAccountBase(BaseModel):
-    username: str  # Changed from twitter_handle to username
-    name: str  # Changed from username to name
+    username: str 
+    name: str  
     twitter_user_id: str
 
 class TwitterAccountCreate(TwitterAccountBase):
@@ -53,7 +53,7 @@ class TweetCreate(TweetBase):
 
 class Tweet(TweetBase):
     tweet_id: int
-    twitter_user_id: str
+    twitter_user_id: Optional[str] = None  
 
     class Config:
         from_attributes = True
@@ -62,13 +62,13 @@ class InteractionBase(BaseModel):
     interaction_type: InteractionType
 
 class InteractionCreate(InteractionBase):
-    tweet_id: Optional[int] = None  # Make tweet_id optional
-    user_id: Optional[str] = None  # Add user_id and make it optional
+    tweet_id: Optional[int] = None  
+    user_id: Optional[str] = None  
 
 class Interaction(InteractionBase):
     interaction_id: int
-    tweet_id: Optional[int] = None  # Make tweet_id optional
-    user_id: Optional[str] = None  # Add user_id and make it optional
+    tweet_id: Optional[int] = None  
+    user_id: Optional[str] = None  
     agent_id: int
     created_at: datetime
 
