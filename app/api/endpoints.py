@@ -41,6 +41,11 @@ def read_agent(agent_id: int, db: Session = Depends(get_db), api_key: str = Depe
 
 @router.post("/api/agents/{agent_id}/twitter_accounts/", response_model=schemas.TwitterAccount)
 def create_twitter_account(agent_id: int, account: schemas.TwitterAccountCreate, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    # Check if a Twitter account with the provided twitter_user_id already exists
+    existing_account = db.query(models.TwitterAccount).filter(models.TwitterAccount.twitter_user_id == account.twitter_user_id).first()
+    if existing_account:
+        raise HTTPException(status_code=409, detail="Twitter account with this twitter_user_id already exists")
+    
     db_account = models.TwitterAccount(
         agent_id=agent_id,
         username=account.username,  # Changed from twitter_handle to username
@@ -65,7 +70,7 @@ def create_tweet(agent_id: int, twitter_user_id: str, tweet: schemas.TweetCreate
         raise HTTPException(status_code=400, detail="tweet_id is required")
     
     db_tweet = models.Tweet(
-        tweet_id=tweet.tweet_id,  # Use the provided tweet_id if available
+        tweet_id=tweet.tweet_id, 
         twitter_user_id=twitter_user_id,
         user_name=tweet.user_name,
         text=tweet.text,
