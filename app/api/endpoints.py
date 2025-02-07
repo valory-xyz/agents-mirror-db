@@ -8,6 +8,7 @@ from ..db import get_db
 from ..dependencies import get_api_key
 from ..utils import generate_api_key
 from ..models.models import InteractionType
+from collections import defaultdict
 
 router = APIRouter()
 
@@ -163,4 +164,19 @@ def get_interactions_by_agent_id(agent_id: int, db: Session = Depends(get_db), a
     if not db_interactions:
         raise HTTPException(status_code=404, detail="No interactions found for this agent ID")
     return db_interactions
+
+@router.get("/api/active_usernames/", response_model=List[str])
+def get_active_usernames(db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_twitter_accounts = db.query(models.TwitterAccount).order_by(models.TwitterAccount.created_at.desc()).all()
+    if not db_twitter_accounts:
+        raise HTTPException(status_code=404, detail="No Twitter accounts found")
+
+    # Use a dictionary to store the most recent username for each agent
+    agent_usernames = defaultdict(list)
+    for account in db_twitter_accounts:
+        agent_usernames[account.agent_id].append(account.username)
+
+    # Extract the most recent username for each agent
+    active_usernames = [usernames[0] for usernames in agent_usernames.values()]
+    return active_usernames
 
