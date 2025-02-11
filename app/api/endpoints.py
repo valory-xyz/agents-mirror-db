@@ -1,7 +1,7 @@
 import datetime
 from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 from ..models import models
 from ..schemas import schemas
 from ..db import get_db
@@ -180,3 +180,25 @@ def get_active_usernames(db: Session = Depends(get_db), api_key: str = Depends(g
     active_usernames = [usernames[0] for usernames in agent_usernames.values()]
     return active_usernames
 
+@router.get("/api/twitter_accounts/{twitter_user_id}", response_model=schemas.TwitterAccount)
+def get_twitter_account(twitter_user_id: str, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_account = db.query(models.TwitterAccount).filter(models.TwitterAccount.twitter_user_id == twitter_user_id).first()
+    if db_account is None:
+        raise HTTPException(status_code=404, detail="Twitter account not found")
+    return db_account
+
+@router.get("/api/active_twitter_accounts/", response_model=List[schemas.TwitterAccount])
+def get_active_twitter_accounts(db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    db_twitter_accounts = db.query(models.TwitterAccount).order_by(models.TwitterAccount.created_at.desc()).all()
+    if not db_twitter_accounts:
+        raise HTTPException(status_code=404, detail="No Twitter accounts found")
+
+    # Use a dictionary to store the most recent account for each agent
+    agent_accounts: Dict[int, schemas.TwitterAccount] = {}
+    for account in db_twitter_accounts:
+        if account.agent_id not in agent_accounts:
+            agent_accounts[account.agent_id] = account
+
+    # Extract the most recent account for each agent
+    active_accounts = list(agent_accounts.values())
+    return active_accounts
