@@ -123,6 +123,8 @@ to include the new APIs:
 - **Get Twitter Accounts by Agent ID**: `GET /api/agents/{agent_id}/twitter_accounts/`
 - **Get Latest Tweets by Agent ID**: `GET /api/agents/{agent_id}/twitter_accounts/tweets/`
 - **Get Interactions by Agent ID**: `GET /api/agents/{agent_id}/interactions/`
+- **Get Active Usernames**: `GET /api/active_usernames/`
+- **Get Active Twitter Accounts**: `GET /api/active_twitter_accounts/`
 
 ### Example Requests
 
@@ -138,10 +140,3 @@ curl -X POST "http://127.0.0.1:8000/api/agents/" -H "Content-Type: application/j
 curl -X POST "http://127.0.0.1:8000/api/agents/1/twitter_accounts/" -H "Content-Type: application/json" -d '{"username": "johndoe", "name": "John Doe", "twitter_user_id": "12345"}'
 ```
 
-## License
-
-This project is licensed under the MIT License.
-
-```
-
-```
