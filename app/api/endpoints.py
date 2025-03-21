@@ -447,17 +447,22 @@ def create_agent_attribute(
     db: Session = Depends(get_db), 
     auth_agent_id: int = Depends(verify_agent_signature)
 ):
+    print(f"Attempting to create an attribute for agent_id: {agent_id}")
     # Verify that the authenticated agent is creating its own attribute
     if auth_agent_id != agent_id:
+        print(f"Authorization failed: auth_agent_id {auth_agent_id} does not match agent_id {agent_id}")
         raise HTTPException(status_code=403, detail="Not authorized to create attributes for this agent")
-    # Verify agent exists
-    db_agent = db.query(models.Agent).filter(models.Agent.agent_id == agent_id).first()
+    
+    # Verify agent exists in AgentRegistry
+    db_agent = db.query(models.AgentRegistry).filter(models.AgentRegistry.agent_id == agent_id).first()
     if db_agent is None:
+        print(f"Agent with agent_id {agent_id} not found in AgentRegistry")
         raise HTTPException(status_code=404, detail="Agent not found")
     
     # Verify attribute definition exists
     db_attr_def = db.query(models.AttributeDefinition).filter(models.AttributeDefinition.attr_def_id == agent_attr.attr_def_id).first()
     if db_attr_def is None:
+        print(f"Attribute definition with attr_def_id {agent_attr.attr_def_id} not found")
         raise HTTPException(status_code=404, detail="Attribute definition not found")
     
     # Create agent attribute
@@ -474,6 +479,7 @@ def create_agent_attribute(
     db.add(db_agent_attr)
     db.commit()
     db.refresh(db_agent_attr)
+    print(f"Created agent attribute with attribute_id {db_agent_attr.attribute_id} for agent_id {agent_id}")
     return db_agent_attr
 
 @router.get("/api/agents/{agent_id}/attributes/", response_model=List[schemas.AgentAttribute])
@@ -483,8 +489,8 @@ def read_agent_attributes(
     limit: int = 100, 
     db: Session = Depends(get_db)
 ):
-    # Verify agent exists
-    db_agent = db.query(models.Agent).filter(models.Agent.agent_id == agent_id).first()
+    # Verify agent exists in AgentRegistry
+    db_agent = db.query(models.AgentRegistry).filter(models.AgentRegistry.agent_id == agent_id).first()
     if db_agent is None:
         raise HTTPException(status_code=404, detail="Agent not found")
     
