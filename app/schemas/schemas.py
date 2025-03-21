@@ -170,5 +170,20 @@ class AgentRegistry(AgentRegistryBase):
 class SignatureAuth(BaseModel):
     agent_id: int
     eth_address: str
+
+class AgentAddressUpdate(BaseModel):
+    is_active: bool
+
+class AgentAddress(AgentAddressBase):
+    address_id: int
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SignatureAuth(BaseModel):
+    agent_id: int
+    eth_address: str
     signature: str
     message: str
