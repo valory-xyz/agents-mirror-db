@@ -167,7 +167,8 @@ class AgentRegistry(AgentRegistryBase):
     class Config:
         from_attributes = True
 
-class SignatureAuth(BaseModel):
+
+class AgentAddressBase(BaseModel):
     agent_id: int
     eth_address: str
 
