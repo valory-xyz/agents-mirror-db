@@ -9,7 +9,7 @@ from ..dependencies import get_api_key, verify_agent_signature
 from ..utils import generate_api_key
 from ..models.models import InteractionType
 from collections import defaultdict
-
+from sqlalchemy import func
 router = APIRouter()
 
 @router.post("/api/agents/", response_model=schemas.AgentWithAPIKey)
@@ -202,12 +202,10 @@ def get_active_twitter_accounts(db: Session = Depends(get_db), api_key: str = De
 # AgentType CRUD operations
 @router.post("/api/agent-types/", response_model=schemas.AgentType)
 def create_agent_type(
-    agent_type: schemas.AgentTypeCreate, 
-    auth: schemas.SignatureAuth,
+    agent_type: schemas.AgentTypeCreate,
     db: Session = Depends(get_db)
 ):
-    # Verify the signature
-    agent_id = verify_agent_signature(auth, db)
+
     db_agent_type = models.AgentType(
         type_name=agent_type.type_name,
         description=agent_type.description
@@ -225,6 +223,30 @@ def read_agent_types(
 ):
     agent_types = db.query(models.AgentType).offset(skip).limit(limit).all()
     return agent_types
+
+@router.get("/api/agent-types/name/{type_name}", response_model=schemas.AgentType)
+def read_agent_type_by_name(type_name: str, db: Session = Depends(get_db)):
+    db_agent_type = db.query(models.AgentType).filter(func.lower(models.AgentType.type_name) == type_name.lower()).first()
+    if db_agent_type is None:
+        raise HTTPException(status_code=404, detail="Agent type not found")
+    return db_agent_type
+
+@router.get("/api/attributes/name/{attr_name}", response_model=schemas.AttributeDefinition)
+def read_attribute_definition_by_name(attr_name: str, db: Session = Depends(get_db)):
+    db_attr_def = db.query(models.AttributeDefinition).filter(models.AttributeDefinition.attr_name == attr_name).first()
+    if db_attr_def is None:
+        raise HTTPException(status_code=404, detail="Attribute definition not found")
+    return db_attr_def
+
+@router.get("/api/agents/{agent_id}/attributes/{attr_def_id}", response_model=schemas.AgentAttribute)
+def read_agent_attribute_by_agent_and_def(agent_id: int, attr_def_id: int, db: Session = Depends(get_db)):
+    db_agent_attr = db.query(models.AgentAttribute).filter(
+        models.AgentAttribute.agent_id == agent_id,
+        models.AgentAttribute.attr_def_id == attr_def_id
+    ).first()
+    if db_agent_attr is None:
+        raise HTTPException(status_code=404, detail="Agent attribute not found")
+    return db_agent_attr
 
 @router.get("/api/agent-types/{type_id}", response_model=schemas.AgentType)
 def read_agent_type(type_id: int, db: Session = Depends(get_db)):
@@ -379,6 +401,13 @@ def read_agent_registries(
 @router.get("/api/agent-registry/{agent_id}", response_model=schemas.AgentRegistry)
 def read_agent_registry(agent_id: int, db: Session = Depends(get_db)):
     db_agent_registry = db.query(models.AgentRegistry).filter(models.AgentRegistry.agent_id == agent_id).first()
+    if db_agent_registry is None:
+        raise HTTPException(status_code=404, detail="Agent registry not found")
+    return db_agent_registry
+
+@router.get("/api/agent-registry/address/{eth_address}", response_model=schemas.AgentRegistry)
+def read_agent_registry_by_address(eth_address: str, db: Session = Depends(get_db)):
+    db_agent_registry = db.query(models.AgentRegistry).filter(models.AgentRegistry.eth_address == eth_address).first()
     if db_agent_registry is None:
         raise HTTPException(status_code=404, detail="Agent registry not found")
     return db_agent_registry

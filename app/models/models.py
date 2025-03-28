@@ -87,7 +87,7 @@ class AgentAttribute(Base):
     __tablename__ = 'agent_attributes'
     
     attribute_id = Column(Integer, primary_key=True, index=True)
-    agent_id = Column(Integer, ForeignKey('agents.agent_id'))
+    agent_id = Column(Integer, ForeignKey('agent_registry.agent_id'))
     attr_def_id = Column(Integer, ForeignKey('attribute_definitions.attr_def_id'))
     string_value = Column(String, nullable=True)
     integer_value = Column(Integer, nullable=True)
@@ -97,7 +97,7 @@ class AgentAttribute(Base):
     json_value = Column(JSON, nullable=True)
     last_updated = Column(DateTime, default=datetime.datetime.utcnow)
     
-    agent = relationship("Agent")
+    agent_registry = relationship("AgentRegistry",back_populates="agent_attributes")
     attribute_definition = relationship("AttributeDefinition", back_populates="agent_attributes")
 
 class AgentRegistry(Base):
@@ -110,6 +110,7 @@ class AgentRegistry(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     agent_type = relationship("AgentType", back_populates="agent_registries")
+    agent_attributes = relationship("AgentAttribute", back_populates="agent_registry")
 
 # Define relationships
 Agent.twitter_accounts = relationship("TwitterAccount", order_by=TwitterAccount.twitter_user_id, back_populates="agent")
