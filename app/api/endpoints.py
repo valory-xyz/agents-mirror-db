@@ -233,7 +233,7 @@ def read_agent_type_by_name(type_name: str, db: Session = Depends(get_db)):
 
 @router.get("/api/attributes/name/{attr_name}", response_model=schemas.AttributeDefinition)
 def read_attribute_definition_by_name(attr_name: str, db: Session = Depends(get_db)):
-    db_attr_def = db.query(models.AttributeDefinition).filter(models.AttributeDefinition.attr_name == attr_name).first()
+    db_attr_def = db.query(models.AttributeDefinition).filter(func.lower(models.AttributeDefinition.attr_name) == attr_name.lower()).first()
     if db_attr_def is None:
         raise HTTPException(status_code=404, detail="Attribute definition not found")
     return db_attr_def
@@ -247,6 +247,23 @@ def read_agent_attribute_by_agent_and_def(agent_id: int, attr_def_id: int, db: S
     if db_agent_attr is None:
         raise HTTPException(status_code=404, detail="Agent attribute not found")
     return db_agent_attr
+
+@router.get("/api/agents/{agent_id}/all-attributes/", response_model=List[schemas.AgentAttribute])
+def read_all_attributes_of_agent(agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)):
+    # Verify agent exists in AgentRegistry
+    db_agent = db.query(models.AgentRegistry).filter(models.AgentRegistry.agent_id == agent_id).first()
+    if db_agent is None:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    # Get all attributes for the agent
+    agent_attributes = db.query(models.AgentAttribute).filter(
+        models.AgentAttribute.agent_id == agent_id
+    ).all()
+    
+    if not agent_attributes:
+        raise HTTPException(status_code=404, detail="No attributes found for this agent ID")
+    
+    return agent_attributes
 
 @router.get("/api/agent-types/{type_id}", response_model=schemas.AgentType)
 def read_agent_type(type_id: int, db: Session = Depends(get_db)):
