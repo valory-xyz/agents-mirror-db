@@ -28,12 +28,11 @@ async def verify_agent_signature(
     Verify the ECDSA signature provided in the request body.
     
     Args:
-        auth: The SignatureAuth object containing agent_id, eth_address, signature, and message
+        auth: The SignatureAuth object containing agent_id, signature, and message
     """
     # Check if the address is registered
     db_agent = db.query(models.AgentRegistry).filter(
-        models.AgentRegistry.agent_id == auth.agent_id,
-        models.AgentRegistry.eth_address == auth.eth_address
+        models.AgentRegistry.agent_id == auth.agent_id
     ).first()
     
     if not db_agent:
@@ -43,7 +42,7 @@ async def verify_agent_signature(
         )
     
     # Verify the signature
-    if not verify_signature(auth.message, auth.signature, auth.eth_address):
+    if not verify_signature(auth.message, auth.signature, db_agent.eth_address):
         raise HTTPException(
             status_code=401,
             detail="Invalid signature"

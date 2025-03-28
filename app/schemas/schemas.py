@@ -185,6 +185,5 @@ class AgentAddress(AgentAddressBase):
 
 class SignatureAuth(BaseModel):
     agent_id: int
-    eth_address: str
     signature: str
     message: str
