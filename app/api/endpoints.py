@@ -193,12 +193,49 @@ def get_active_twitter_accounts(db: Session = Depends(get_db), api_key: str = De
     if not db_twitter_accounts:
         raise HTTPException(status_code=404, detail="No Twitter accounts found")
 
-    # Use a dictionary to store the most recent account for each agent
-    agent_accounts: Dict[int, schemas.TwitterAccount] = {}
-    for account in db_twitter_accounts:
-        if account.agent_id not in agent_accounts:
-            agent_accounts[account.agent_id] = account
+    # Get current date and calculate the date 7 days ago
+    current_date = datetime.datetime.utcnow()
+    seven_days_ago = current_date - datetime.timedelta(days=7)
 
-    # Extract the most recent account for each agent
-    active_accounts = list(agent_accounts.values())
+    # Use a dictionary to store the most recent account for each agent
+    agent_accounts: Dict[int, models.TwitterAccount] = {}
+    active_accounts = []
+
+    for account in db_twitter_accounts:
+        # Skip if we already have a more recent account for this agent
+        if account.agent_id in agent_accounts:
+            continue
+
+        # Check for tweets in the last 7 days
+        recent_tweets = (
+            db.query(models.Tweet)
+            .filter(
+                models.Tweet.twitter_user_id == account.twitter_user_id,
+                models.Tweet.created_at >= seven_days_ago,
+            )
+            .first()
+        )
+
+        # Check for interactions in the last 7 days
+        recent_interactions = (
+            db.query(models.Interaction)
+            .join(models.Tweet, models.Tweet.tweet_id == models.Interaction.tweet_id)
+            .filter(
+                models.Tweet.twitter_user_id == account.twitter_user_id,
+                models.Interaction.created_at >= seven_days_ago,
+            )
+            .first()
+        )
+
+        # If there's been activity in the last 7 days, add this account
+        if recent_tweets or recent_interactions:
+            agent_accounts[account.agent_id] = account
+            active_accounts.append(account)
+
+    if not active_accounts:
+        raise HTTPException(
+            status_code=404,
+            detail="No active Twitter accounts found in the last 7 days",
+        )
+
     return active_accounts
