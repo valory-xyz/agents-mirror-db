@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 from fastapi import APIRouter, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict
@@ -194,7 +195,7 @@ def get_active_twitter_accounts(db: Session = Depends(get_db), api_key: str = De
         raise HTTPException(status_code=404, detail="No Twitter accounts found")
 
     # Get current date and calculate the date 7 days ago
-    current_date = datetime.datetime.utcnow()
+    current_date = datetime.datetime.now(timezone.utc)
     seven_days_ago = current_date - datetime.timedelta(days=7)
 
     # Use a dictionary to store the most recent account for each agent
@@ -216,19 +217,19 @@ def get_active_twitter_accounts(db: Session = Depends(get_db), api_key: str = De
             .first()
         )
 
-        # Check for interactions in the last 7 days
-        recent_interactions = (
+        # Check if the agent associated with this account had ANY interactions (including follows) in the last 7 days
+        recent_agent_interactions = (
             db.query(models.Interaction)
-            .join(models.Tweet, models.Tweet.tweet_id == models.Interaction.tweet_id)
             .filter(
-                models.Tweet.twitter_user_id == account.twitter_user_id,
-                models.Interaction.created_at >= seven_days_ago,
+                models.Interaction.agent_id
+                == account.agent_id,  # Filter by the agent performing the interaction
+                models.Interaction.created_at >= seven_days_ago,  # Filter by time
             )
-            .first()
+            .first()  # We only need to know if at least one exists
         )
 
-        # If there's been activity in the last 7 days, add this account
-        if recent_tweets or recent_interactions:
+        # If there have been recent tweets OR recent interactions by the agent, add this account
+        if recent_tweets or recent_agent_interactions:
             agent_accounts[account.agent_id] = account
             active_accounts.append(account)
 
