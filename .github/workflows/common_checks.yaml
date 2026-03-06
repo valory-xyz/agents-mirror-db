@@ -1,0 +1,61 @@
+name: Common Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lock_check:
+    name: Poetry lock check
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: snok/install-poetry@v1
+      - name: Check poetry lock
+        run: poetry lock --check
+      - name: Install dependencies
+        run: poetry install
+
+  linter_checks:
+    name: Linter checks
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        tox-env:
+          - black-check
+          - isort-check
+          - flake8
+          - mypy
+          - pylint
+          - bandit
+          - safety
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install tox via tomte
+        run: pip install tomte[tox,cli]==0.6.1
+      - name: Run ${{ matrix.tox-env }}
+        run: tox -e ${{ matrix.tox-env }}
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: snok/install-poetry@v1
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run pytest tests/
