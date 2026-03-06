@@ -34,8 +34,9 @@ agents_fun_mirror_db/
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.10+
 - PostgreSQL
+- [Poetry](https://python-poetry.org/docs/#installation)
 
 ### Installation
 
@@ -46,65 +47,16 @@ agents_fun_mirror_db/
    cd agents_fun_mirror_db
    ```
 
-2. Create a virtual environment and activate it:
+2. Install dependencies with Poetry:
 
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   poetry install
    ```
 
-3. Install the dependencies:
+3. Run the application:
 
    ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Run the application:
-
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-
-## Usage
-
-### API Endpoints
-
-Sure, here is the updated
-
-README.md
-
-to include the new APIs:
-
-````markdown
-# Agents Fun Mirror DB
-
-## Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/your-repo/agents_fun_mirror_db.git
-   cd agents_fun_mirror_db
-   ```
-````
-
-2. Create a virtual environment:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. Install the dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Run the application:
-
-   ```bash
-   uvicorn app.main:app --reload
+   poetry run uvicorn app.main:app --reload
    ```
 
 ## Usage
@@ -132,11 +84,10 @@ to include the new APIs:
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/agents/" -H "Content-Type: application/json" -d '{"agent_name": "Agent007"}'
-````
+```
 
 #### Create Twitter Account
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/agents/1/twitter_accounts/" -H "Content-Type: application/json" -d '{"username": "johndoe", "name": "John Doe", "twitter_user_id": "12345"}'
 ```
-
