@@ -21,6 +21,9 @@ eth-account = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0.0,<9.0.0"
+httpx = ">=0.27.0"
+anyio = {version = ">=4.0.0", extras = ["trio"]}
+pytest-anyio = "*"
 tox = ">=4.0.0"
 
 [build-system]
