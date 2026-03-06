@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from ..db import get_db
 from ..dependencies import get_api_key, verify_agent_signature
 from ..models import models
-from ..models.models import InteractionType
+from ..schemas.schemas import InteractionType
 from ..schemas import schemas
 from ..utils import generate_api_key
 

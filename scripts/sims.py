@@ -35,7 +35,13 @@ def create_twitter_account(agent_id, username, name, twitter_user_id, api_key):
 def create_tweet(agent_id, twitter_user_id, user_name, text, created_at, api_key):
     url = f"{BASE_URL}/agents/{agent_id}/accounts/{twitter_user_id}/tweets/"
     headers = {"access-token": api_key}
-    payload = {"user_name": user_name, "text": text, "created_at": created_at}
+    tweet_id = random.randint(1000000000000000000, 9223372036854775807)
+    payload = {
+        "tweet_id": tweet_id,
+        "user_name": user_name,
+        "text": text,
+        "created_at": created_at,
+    }
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code == 200:
         return response.json()
@@ -96,9 +102,10 @@ def simulate_user_behavior():
     # 3. Create tweets and interactions for each account
     interaction_types = ["like", "retweet", "reply", "quote_tweet", "follow"]
     for account in twitter_accounts:
+        tweet_ids = []
         for i in range(random.randint(2, 4)):
             created_at = datetime.datetime.now().isoformat()
-            create_tweet(
+            tweet = create_tweet(
                 account["agent_id"],
                 account["twitter_user_id"],
                 account["user_name"],
@@ -106,15 +113,27 @@ def simulate_user_behavior():
                 created_at,
                 api_key,
             )
+            if tweet:
+                tweet_ids.append(tweet["tweet_id"])
 
         for _ in range(random.randint(5, 10)):
             interaction_type = random.choice(interaction_types)
-            create_interaction(
-                account["agent_id"],
-                account["twitter_user_id"],
-                interaction_type,
-                api_key,
-            )
+            if interaction_type == "follow":
+                create_interaction(
+                    account["agent_id"],
+                    account["twitter_user_id"],
+                    interaction_type,
+                    api_key,
+                    user_id=account["twitter_user_id"],
+                )
+            elif tweet_ids:
+                create_interaction(
+                    account["agent_id"],
+                    account["twitter_user_id"],
+                    interaction_type,
+                    api_key,
+                    tweet_id=random.choice(tweet_ids),
+                )
 
 
 if __name__ == "__main__":
