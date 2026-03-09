@@ -1,7 +1,9 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import List, Optional
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel
+
 
 class InteractionType(str, Enum):
     like = "like"
@@ -10,11 +12,14 @@ class InteractionType(str, Enum):
     quote_tweet = "quote_tweet"
     follow = "follow"
 
+
 class AgentBase(BaseModel):
     agent_name: str
 
+
 class AgentCreate(AgentBase):
     pass
+
 
 class Agent(AgentBase):
     agent_id: int
@@ -23,19 +28,23 @@ class Agent(AgentBase):
     class Config:
         from_attributes = True
 
+
 class AgentWithAPIKey(Agent):
     api_key: str
 
     class Config:
         from_attributes = True
 
+
 class TwitterAccountBase(BaseModel):
-    username: str 
-    name: str  
+    username: str
+    name: str
     twitter_user_id: str
+
 
 class TwitterAccountCreate(TwitterAccountBase):
     pass
+
 
 class TwitterAccount(TwitterAccountBase):
     created_at: datetime
@@ -43,43 +52,52 @@ class TwitterAccount(TwitterAccountBase):
     class Config:
         from_attributes = True
 
+
 class TweetBase(BaseModel):
     user_name: str
     text: str
     created_at: datetime
 
+
 class TweetCreate(TweetBase):
     tweet_id: Optional[int] = None
 
+
 class Tweet(TweetBase):
     tweet_id: int
-    twitter_user_id: Optional[str] = None  
+    twitter_user_id: Optional[str] = None
 
     class Config:
         from_attributes = True
 
+
 class InteractionBase(BaseModel):
     interaction_type: InteractionType
 
+
 class InteractionCreate(InteractionBase):
-    tweet_id: Optional[int] = None  
-    user_id: Optional[str] = None  
+    tweet_id: Optional[int] = None
+    user_id: Optional[str] = None
+
 
 class Interaction(InteractionBase):
     interaction_id: int
-    tweet_id: Optional[int] = None  
-    user_id: Optional[str] = None  
+    tweet_id: Optional[int] = None
+    user_id: Optional[str] = None
     agent_id: int
     created_at: datetime
 
     class Config:
         from_attributes = True
 
+
 class APIKeyBase(BaseModel):
     agent_id: int
 
+
 class APIKeyCreate(APIKeyBase):
     pass
+
 
 class APIKey(APIKeyBase):
     id: int
@@ -89,21 +107,26 @@ class APIKey(APIKeyBase):
     class Config:
         from_attributes = True
 
+
 class AgentTypeBase(BaseModel):
     type_name: str
     description: str
 
+
 class AgentTypeCreate(AgentTypeBase):
     pass
 
+
 class AgentTypeUpdate(AgentTypeBase):
     pass
+
 
 class AgentType(AgentTypeBase):
     type_id: int
 
     class Config:
         from_attributes = True
+
 
 class AttributeDefinitionBase(BaseModel):
     type_id: int
@@ -112,17 +135,21 @@ class AttributeDefinitionBase(BaseModel):
     is_required: bool
     default_value: Optional[str] = None
 
+
 class AttributeDefinitionCreate(AttributeDefinitionBase):
     pass
 
+
 class AttributeDefinitionUpdate(AttributeDefinitionBase):
     pass
+
 
 class AttributeDefinition(AttributeDefinitionBase):
     attr_def_id: int
 
     class Config:
         from_attributes = True
+
 
 class AgentAttributeBase(BaseModel):
     agent_id: int
@@ -134,11 +161,14 @@ class AgentAttributeBase(BaseModel):
     date_value: Optional[datetime] = None
     json_value: Optional[dict] = None
 
+
 class AgentAttributeCreate(AgentAttributeBase):
     pass
 
+
 class AgentAttributeUpdate(AgentAttributeBase):
     pass
+
 
 class AgentAttribute(AgentAttributeBase):
     attribute_id: int
@@ -147,18 +177,22 @@ class AgentAttribute(AgentAttributeBase):
     class Config:
         from_attributes = True
 
+
 class AgentRegistryBase(BaseModel):
     agent_name: str
     type_id: int
     eth_address: str  # Ethereum address for authentication
 
+
 class AgentRegistryCreate(AgentRegistryBase):
     pass
+
 
 class AgentRegistryUpdate(BaseModel):
     agent_name: Optional[str] = None
     type_id: Optional[int] = None
     eth_address: Optional[str] = None
+
 
 class AgentRegistry(AgentRegistryBase):
     agent_id: int
@@ -172,8 +206,10 @@ class AgentAddressBase(BaseModel):
     agent_id: int
     eth_address: str
 
+
 class AgentAddressUpdate(BaseModel):
     is_active: bool
+
 
 class AgentAddress(AgentAddressBase):
     address_id: int
@@ -182,6 +218,7 @@ class AgentAddress(AgentAddressBase):
 
     class Config:
         from_attributes = True
+
 
 class SignatureAuth(BaseModel):
     agent_id: int

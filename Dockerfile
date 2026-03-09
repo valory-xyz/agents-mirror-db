@@ -1,14 +1,21 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Install poetry
+RUN pip install --no-cache-dir poetry
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy poetry files first for better caching
+COPY pyproject.toml poetry.lock /app/
+
+# Install dependencies (no virtualenv in container)
+RUN poetry config virtualenvs.create false && \
+    poetry install --only main --no-interaction --no-ansi
+
+# Copy the rest of the application
+COPY . /app
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
