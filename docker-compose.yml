@@ -3,10 +3,11 @@ version: "3.8"
 services:
   db:
     image: postgres:13
+    env_file: .env
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin_passw0rd
-      POSTGRES_DB: pg_database
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -15,14 +16,13 @@ services:
   web:
     build: .
     command: uvicorn app.main:app --host 0.0.0.0 --port 80 --reload
+    env_file: .env
     volumes:
       - .:/app
     ports:
       - "8000:80"
     depends_on:
       - db
-    environment:
-      - SQLALCHEMY_DATABASE_URL=postgresql://admin:admin_passw0rd@db:5432/pg_database
 
 volumes:
   postgres_data:

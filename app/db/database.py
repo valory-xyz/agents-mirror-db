@@ -6,9 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from ..models.models import Base  # Ensure this import is correct
 
 # Use environment variables for database URL
-SQLALCHEMY_DATABASE_URL = os.getenv(
-    "SQLALCHEMY_DATABASE_URL", "postgresql://admin:admin_passw0rd@db:5432/pg_database"
-)
+SQLALCHEMY_DATABASE_URL = os.environ["SQLALCHEMY_DATABASE_URL"]
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
