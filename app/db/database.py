@@ -1,18 +1,31 @@
 import os
+from functools import lru_cache
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
-from ..models.models import Base  # Ensure this import is correct
-
-# Use environment variables for database URL
-SQLALCHEMY_DATABASE_URL = os.environ["SQLALCHEMY_DATABASE_URL"]
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from ..models.models import Base
 
 
-def init_db():
+def _database_url() -> str:
+    try:
+        return os.environ["SQLALCHEMY_DATABASE_URL"]
+    except KeyError as e:
+        raise RuntimeError("SQLALCHEMY_DATABASE_URL is not set") from e
+
+
+@lru_cache(maxsize=1)
+def get_engine() -> Engine:
+    return create_engine(_database_url())
+
+
+@lru_cache(maxsize=1)
+def get_session_factory() -> sessionmaker:
+    return sessionmaker(autocommit=False, autoflush=False, bind=get_engine())
+
+
+def init_db() -> None:
     print("Initializing database...")
-    Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=get_engine())
     print("Database initialized.")
