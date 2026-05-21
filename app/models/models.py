@@ -1,3 +1,5 @@
+"""SQLAlchemy ORM model definitions and the shared `Base` declarative class."""
+
 import datetime
 import enum
 
@@ -17,10 +19,12 @@ from sqlalchemy.orm import DeclarativeBase, relationship
 
 
 class Base(DeclarativeBase):
-    pass
+    """Declarative base class for every ORM model in this module."""
 
 
 class InteractionType(enum.Enum):
+    """Allowed values for `Interaction.interaction_type`."""
+
     like = "like"
     retweet = "retweet"
     reply = "reply"
@@ -29,6 +33,8 @@ class InteractionType(enum.Enum):
 
 
 class Agent(Base):
+    """An agent that owns one or more Twitter accounts and API keys."""
+
     __tablename__ = "agents"
     agent_id = Column(Integer, primary_key=True, index=True)
     agent_name = Column(String, index=True)
@@ -39,6 +45,8 @@ class Agent(Base):
 
 
 class TwitterAccount(Base):
+    """A Twitter account owned by an `Agent`."""
+
     __tablename__ = "twitter_accounts"
     twitter_user_id = Column(String, primary_key=True, index=True)
     agent_id = Column(Integer, ForeignKey("agents.agent_id"))
@@ -51,6 +59,8 @@ class TwitterAccount(Base):
 
 
 class Tweet(Base):
+    """A tweet authored from a `TwitterAccount`."""
+
     __tablename__ = "tweets"
     tweet_id = Column(BigInteger, primary_key=True, index=True)
     twitter_user_id = Column(
@@ -68,6 +78,8 @@ class Tweet(Base):
 
 
 class Interaction(Base):
+    """An action (like, retweet, reply, quote, follow) recorded against an agent."""
+
     __tablename__ = "interactions"
     interaction_id = Column(Integer, primary_key=True, index=True)
     tweet_id = Column(BigInteger, ForeignKey("tweets.tweet_id"), nullable=True)
@@ -82,6 +94,8 @@ class Interaction(Base):
 
 
 class APIKey(Base):
+    """An API key bound to a single `Agent` used to authorize protected endpoints."""
+
     __tablename__ = "api_keys"
     id = Column(Integer, primary_key=True, index=True)
     key = Column(String, unique=True, index=True)
@@ -93,6 +107,8 @@ class APIKey(Base):
 
 
 class AgentType(Base):
+    """Schema definition for a family of agents (e.g. trader, oracle)."""
+
     __tablename__ = "agent_types"
 
     type_id = Column(Integer, primary_key=True, index=True)
@@ -106,6 +122,8 @@ class AgentType(Base):
 
 
 class AttributeDefinition(Base):
+    """Declares a typed attribute that agents of a given `AgentType` carry."""
+
     __tablename__ = "attribute_definitions"
 
     attr_def_id = Column(Integer, primary_key=True, index=True)
@@ -122,6 +140,8 @@ class AttributeDefinition(Base):
 
 
 class AgentAttribute(Base):
+    """A typed value for one `AttributeDefinition` on one registered agent."""
+
     __tablename__ = "agent_attributes"
 
     attribute_id = Column(Integer, primary_key=True, index=True)
@@ -144,6 +164,8 @@ class AgentAttribute(Base):
 
 
 class AgentRegistry(Base):
+    """Registry entry binding an agent ID to an Ethereum address and `AgentType`."""
+
     __tablename__ = "agent_registry"
 
     agent_id = Column(Integer, primary_key=True, index=True)
