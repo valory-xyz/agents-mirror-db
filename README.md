@@ -36,7 +36,7 @@ agents_fun_mirror_db/
 
 - Python 3.10+
 - PostgreSQL
-- [Poetry](https://python-poetry.org/docs/#installation)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ### Installation
 
@@ -47,16 +47,16 @@ agents_fun_mirror_db/
    cd agents_fun_mirror_db
    ```
 
-2. Install dependencies with Poetry:
+2. Install dependencies (runtime + dev):
 
    ```bash
-   poetry install
+   uv sync --frozen --all-groups
    ```
 
 3. Run the application:
 
    ```bash
-   poetry run uvicorn app.main:app --reload
+   uv run uvicorn app.main:app --reload
    ```
 
 ## Usage

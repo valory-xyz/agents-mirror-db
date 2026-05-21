@@ -1,0 +1,19 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+docker-compose.yml
+README.md
+CONTRIBUTING.md
+.github
+tox.ini
+
+# Secrets — `.env.sample` is tracked; real `.env` and variants stay out
+# of the image (env vars are expected at container start).
+.env
+.env.*
+!.env.sample

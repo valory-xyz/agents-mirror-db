@@ -7,20 +7,26 @@ on:
 
 jobs:
   lock_check:
-    name: Poetry lock check
+    name: uv lock check
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
-      - uses: snok/install-poetry@v1
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
         with:
-          version: "1.8.0"
-      - name: Check poetry lock
-        run: poetry lock --check
-      - name: Install dependencies
-        run: poetry install
+          version: "0.11.15"
+      - name: Check uv lock
+        run: uv lock --check
+
+  docker_build:
+    name: Docker build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build image (no push)
+        run: docker build -t agents-mirror-db:pr-${{ github.event.pull_request.number || github.sha }} .
 
   linter_checks:
     name: Linter checks
@@ -40,8 +46,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install tox via tomte
-        run: pip install tomte[tox,cli]==0.6.1
+      - name: Install tox via tomte (+ tox-uv for fast venv creation)
+        run: pip install tomte[tox,cli]==0.6.1 tox-uv
       - name: Run ${{ matrix.tox-env }}
         run: tox -e ${{ matrix.tox-env }}
 
@@ -59,8 +65,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install tox
-        run: pip install tox
+      - name: Install tox + tox-uv
+        run: pip install tox tox-uv
       - if: matrix.os == 'ubuntu-24.04'
         name: Run tests (Linux)
         run: tox -e py${{ matrix.python-version }}-linux
@@ -73,7 +79,7 @@ jobs:
 
   all_checks_passed:
     name: All checks passed
-    needs: [lock_check, linter_checks, test]
+    needs: [lock_check, docker_build, linter_checks, test]
     if: always()
     runs-on: ubuntu-24.04
     steps:
