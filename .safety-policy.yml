@@ -1,6 +1,6 @@
-# Safety policy file. Loaded automatically when present in the
-# working directory; safety 3.x requires `--policy-file` (or this
-# auto-discovered file at the repo root) and errors otherwise.
+# Safety policy file referenced explicitly by `tox -e safety` via
+# `--policy-file .safety-policy.yml`. safety 3.x errors when
+# neither a policy file nor an API key is configured.
 #
 # Add IDs under `ignore-vulnerabilities` with a `reason:` if a
 # scan flags something we've consciously accepted. Empty for now —

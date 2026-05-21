@@ -6,8 +6,6 @@ __pycache__
 *.pyo
 *.pyd
 .DS_Store
-.dockerignore
-Dockerfile
 docker-compose.yml
 README.md
 CONTRIBUTING.md

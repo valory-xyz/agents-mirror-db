@@ -6,7 +6,6 @@ FROM python:3.12-slim
 COPY --from=ghcr.io/astral-sh/uv:0.11.15@sha256:e590846f4776907b254ac0f44b5b380347af5d90d668138ca7938d1b0c2f98d3 /uv /uvx /usr/local/bin/
 
 ENV UV_LINK_MODE=copy \
-    UV_PROJECT_ENVIRONMENT=/app/.venv \
     UV_COMPILE_BYTECODE=1
 
 WORKDIR /app
