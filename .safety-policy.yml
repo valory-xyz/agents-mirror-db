@@ -1,0 +1,11 @@
+# Safety policy file. Loaded automatically when present in the
+# working directory; safety 3.x requires `--policy-file` (or this
+# auto-discovered file at the repo root) and errors otherwise.
+#
+# Add IDs under `ignore-vulnerabilities` with a `reason:` if a
+# scan flags something we've consciously accepted. Empty for now —
+# the prior `tox -e safety` invocation passed no `-i` flags either,
+# so there are no legacy carryovers to port.
+security:
+  ignore-vulnerabilities: {}
+  continue-on-vulnerability-error: False

@@ -15,13 +15,13 @@ Also mention potential effects on other branches/code might have from your chang
 For a clean workflow, run checks in the following order before making a PR or pushing the code
 
 ```bash
-poetry run tox -e black-check,isort-check,flake8,mypy,pylint,bandit,safety
+uv run tox -e black-check,isort-check,flake8,mypy,pylint,bandit,safety
 ```
 
 To auto-format code:
 
 ```bash
-poetry run tox -e black,isort
+uv run tox -e black,isort
 ```
 
 ### Documentation (Docstrings and inline comments)
