@@ -34,9 +34,14 @@ tomte_dep_pin = "==0.7.0"
 packages_paths = "."
 service_specific_packages = ["app", "scripts"]
 pytest_targets = ["tests"]
-# This repo doesn't ship open-autonomy / open-aea, but tomte's
-# canonical references them. Declare the fleet-current versions so
-# rendering succeeds; the lint envs that matter (black/isort/flake8/
-# mypy/bandit/safety) skip_install and won't actually pull them.
+# This repo doesn't ship open-autonomy / open-aea, but tomte's canonical
+# `[deps-packages]` interpolates these versions into its dep list. Six lint
+# envs (`black`, `isort`, `flake8`, `mypy`, `bandit`, `safety`) use
+# `skip_install = True` and ignore `[deps-packages]`, so the OA stack is
+# not actually pulled there. `[testenv:pylint]` does inherit
+# `{[deps-packages]deps}` and therefore installs
+# `open-autonomy[all]==<open_autonomy_version>` plus the open-aea ledger
+# plugins on every pylint run (~60s in CI). Tomte v0.7.0 has no
+# opt-out — accept it, or stop running pylint via the wrapper.
 open_autonomy_version = "0.21.22"
 open_aea_version = "2.2.6"

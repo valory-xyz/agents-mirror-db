@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class InteractionType(str, Enum):
@@ -30,24 +30,16 @@ class AgentCreate(AgentBase):
 class Agent(AgentBase):
     """Agent response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     agent_id: int
     created_at: datetime
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class AgentWithAPIKey(Agent):
     """Agent response that also includes the freshly minted API key."""
 
     api_key: str
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class TwitterAccountBase(BaseModel):
@@ -65,12 +57,9 @@ class TwitterAccountCreate(TwitterAccountBase):
 class TwitterAccount(TwitterAccountBase):
     """Twitter account response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     created_at: datetime
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class TweetBase(BaseModel):
@@ -90,13 +79,10 @@ class TweetCreate(TweetBase):
 class Tweet(TweetBase):
     """Tweet response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     tweet_id: int
     twitter_user_id: Optional[str] = None
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class InteractionBase(BaseModel):
@@ -115,16 +101,13 @@ class InteractionCreate(InteractionBase):
 class Interaction(InteractionBase):
     """Interaction response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     interaction_id: int
     tweet_id: Optional[int] = None
     user_id: Optional[str] = None
     agent_id: int
     created_at: datetime
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class APIKeyBase(BaseModel):
@@ -140,14 +123,11 @@ class APIKeyCreate(APIKeyBase):
 class APIKey(APIKeyBase):
     """API key response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     key: str
     created_at: datetime
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class AgentTypeBase(BaseModel):
@@ -168,12 +148,9 @@ class AgentTypeUpdate(AgentTypeBase):
 class AgentType(AgentTypeBase):
     """Agent type response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     type_id: int
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class AttributeDefinitionBase(BaseModel):
@@ -197,12 +174,9 @@ class AttributeDefinitionUpdate(AttributeDefinitionBase):
 class AttributeDefinition(AttributeDefinitionBase):
     """Attribute definition response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     attr_def_id: int
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class AgentAttributeBase(BaseModel):
@@ -229,13 +203,10 @@ class AgentAttributeUpdate(AgentAttributeBase):
 class AgentAttribute(AgentAttributeBase):
     """Agent attribute response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     attribute_id: int
     last_updated: datetime
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class AgentRegistryBase(BaseModel):
@@ -261,13 +232,10 @@ class AgentRegistryUpdate(BaseModel):
 class AgentRegistry(AgentRegistryBase):
     """Agent registry response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     agent_id: int
     created_at: datetime
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class AgentAddressBase(BaseModel):
@@ -286,14 +254,11 @@ class AgentAddressUpdate(BaseModel):
 class AgentAddress(AgentAddressBase):
     """Agent address response, populated from the ORM model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     address_id: int
     is_active: bool
     created_at: datetime
-
-    class Config:
-        """Pydantic config: allow construction from SQLAlchemy attributes."""
-
-        from_attributes = True
 
 
 class SignatureAuth(BaseModel):

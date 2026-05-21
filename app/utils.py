@@ -33,8 +33,10 @@ def verify_signature(message: str, signature: str, address: str) -> bool:
         # `Account.recover_message` is a @combomethod (callable as class or
         # instance method); pylint doesn't recognize the descriptor and reports
         # E1120 thinking `self` is missing.
-        recovered_address = Account.recover_message(  # pylint: disable=no-value-for-parameter
-            signable_message, signature=signature
+        recovered_address = (
+            Account.recover_message(  # pylint: disable=no-value-for-parameter
+                signable_message, signature=signature
+            )
         )
 
         # Compare the recovered address with the provided address
