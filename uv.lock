@@ -25,6 +25,12 @@ dev = [
     { name = "tomte", extra = ["cli", "tests"] },
     { name = "tox-uv" },
 ]
+test = [
+    { name = "anyio", extra = ["trio"] },
+    { name = "httpx" },
+    { name = "pytest" },
+    { name = "pytest-anyio" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -45,6 +51,12 @@ dev = [
     { name = "pytest-anyio" },
     { name = "tomte", extras = ["cli", "tests"], specifier = "==0.7.0" },
     { name = "tox-uv", specifier = "==1.16.0" },
+]
+test = [
+    { name = "anyio", extras = ["trio"], specifier = ">=4.0.0" },
+    { name = "httpx", specifier = ">=0.27.0" },
+    { name = "pytest", specifier = ">=8.0.0,<9.0.0" },
+    { name = "pytest-anyio" },
 ]
 
 [[package]]
