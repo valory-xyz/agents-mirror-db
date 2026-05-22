@@ -1,11 +1,11 @@
-# Safety policy file referenced explicitly by `tox -e safety` via
-# `--policy-file .safety-policy.yml`. safety 3.x errors when
-# neither a policy file nor an API key is configured.
+# Safety policy file auto-discovered by `safety check` when present
+# at the repo root. Tomte's canonical `[testenv:safety]` runs `safety
+# check` without an explicit `--policy-file`; safety 3.x errors when
+# neither a policy file nor an API key is configured, so this file
+# being here is what keeps that env green.
 #
-# Add IDs under `ignore-vulnerabilities` with a `reason:` if a
-# scan flags something we've consciously accepted. Empty for now —
-# the prior `tox -e safety` invocation passed no `-i` flags either,
-# so there are no legacy carryovers to port.
+# Add IDs under `ignore-vulnerabilities` with a `reason:` if a scan
+# flags something we've consciously accepted. Empty for now.
 security:
   ignore-vulnerabilities: {}
   continue-on-vulnerability-error: False

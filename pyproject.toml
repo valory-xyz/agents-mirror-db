@@ -12,31 +12,53 @@ dependencies = [
     "sqlalchemy==2.0.36",
     "psycopg2-binary>=2.9.10,<3",
     "pydantic>=2.11.9,<3",
-    "pydantic-settings>=2.7.1,<3",
-    "python-dotenv==1.0.1",
     "requests",
     "eth-account",
 ]
 
 [dependency-groups]
-dev = [
+# `test` is the runtime-test set: what `pytest tests/` actually imports.
+# CI's test matrix syncs only this group (`uv sync --group test`) so the
+# 15 (3 OS x 5 Python) install cells don't drag in tomte's full CLI
+# tree.
+test = [
     "pytest>=8.0.0,<9.0.0",
     "httpx>=0.27.0",
     "anyio[trio]>=4.0.0",
     "pytest-anyio",
-    "tox>=4.0.0",
-    "tox-uv",
+]
+# `dev` is the local-developer set: test deps plus the lint/format
+# toolchain. `uv sync --all-groups` (the README's command) installs
+# this whole tree.
+dev = [
+    {include-group = "test"},
+    "tomte[cli, tests]==0.7.0",
+    "tox-uv==1.16.0",
 ]
 
 [tool.uv]
 package = false
 
-[tool.black]
-line-length = 88
-
-[tool.isort]
-profile = "black"
-
-[tool.mypy]
-python_version = "3.10"
-ignore_missing_imports = true
+[tool.tomte]
+tomte_dep_pin = "==0.7.0"
+packages_paths = "."
+service_specific_packages = ["app", "scripts"]
+# `pytest_targets` feeds tomte's canonical `[testenv:py{3.X}-{os}]` envs.
+# CI runs `uv run pytest tests/` directly instead — the canonical pytest
+# env runs `autonomy init` + `autonomy packages sync` first, which crashes
+# on a non-AEA repo. Kept declared for canonical-compatibility so that
+# `tomte tox --show` can render without an error, and so a future
+# contributor can run `tomte tox -e py3.12-linux` against this repo if
+# the canonical's pre-commands become opt-out.
+pytest_targets = ["tests"]
+# This repo doesn't ship open-autonomy / open-aea, but tomte's canonical
+# `[deps-packages]` interpolates these versions into its dep list. Six lint
+# envs (`black`, `isort`, `flake8`, `mypy`, `bandit`, `safety`) use
+# `skip_install = True` and ignore `[deps-packages]`, so the OA stack is
+# not actually pulled there. `[testenv:pylint]` does inherit
+# `{[deps-packages]deps}` and therefore installs
+# `open-autonomy[all]==<open_autonomy_version>` plus the open-aea ledger
+# plugins on every pylint run (~60s in CI). Tomte v0.7.0 has no
+# opt-out — accept it, or stop running pylint via the wrapper.
+open_autonomy_version = "0.21.22"
+open_aea_version = "2.2.6"

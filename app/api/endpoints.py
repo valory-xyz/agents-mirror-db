@@ -1,6 +1,8 @@
+"""FastAPI router and HTTP endpoint handlers for the mirror DB service."""
+
 import datetime
 from collections import defaultdict
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
@@ -17,7 +19,10 @@ router = APIRouter()
 
 
 @router.post("/api/agents/", response_model=schemas.AgentWithAPIKey)
-def create_agent(agent: schemas.AgentCreate, db: Session = Depends(get_db)):
+def create_agent(
+    agent: schemas.AgentCreate, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for POST /api/agents/."""
     db_agent = models.Agent(agent_name=agent.agent_name)
     db.add(db_agent)
     db.commit()
@@ -40,8 +45,11 @@ def create_agent(agent: schemas.AgentCreate, db: Session = Depends(get_db)):
 
 @router.get("/api/agents/{agent_id}", response_model=schemas.Agent)
 def read_agent(
-    agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    agent_id: int,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for GET /api/agents/{agent_id}."""
     db_agent = db.query(models.Agent).filter(models.Agent.agent_id == agent_id).first()
     if db_agent is None:
         raise HTTPException(status_code=404, detail="Agent not found")
@@ -54,9 +62,10 @@ def read_agent(
 def create_twitter_account(
     agent_id: int,
     account: schemas.TwitterAccountCreate,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(get_api_key),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for create_twitter_account."""
     # Check if a Twitter account with the provided twitter_user_id already exists
     existing_account = (
         db.query(models.TwitterAccount)
@@ -89,9 +98,10 @@ def create_tweet(
     agent_id: int,
     twitter_user_id: str,
     tweet: schemas.TweetCreate,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(get_api_key),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for create_tweet."""
     if not tweet.tweet_id:
         raise HTTPException(status_code=400, detail="tweet_id is required")
 
@@ -116,9 +126,10 @@ def create_interaction(
     agent_id: int,
     twitter_user_id: str,
     interaction: schemas.InteractionCreate,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(get_api_key),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for create_interaction."""
     if interaction.interaction_type == InteractionType.follow:
         if interaction.user_id is None:
             raise HTTPException(
@@ -163,8 +174,11 @@ def create_interaction(
 
 @router.get("/api/tweets/{tweet_id}", response_model=schemas.Tweet)
 def read_tweet(
-    tweet_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    tweet_id: int,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for GET /api/tweets/{tweet_id}."""
     db_tweet = db.query(models.Tweet).filter(models.Tweet.tweet_id == tweet_id).first()
     if db_tweet is None:
         raise HTTPException(status_code=404, detail="Tweet not found")
@@ -174,9 +188,10 @@ def read_tweet(
 @router.get("/api/interactions/{interaction_id}", response_model=schemas.Interaction)
 def get_interaction(
     interaction_id: int,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(get_api_key),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for GET /api/interactions/{interaction_id}."""
     db_interaction = (
         db.query(models.Interaction)
         .filter(models.Interaction.interaction_id == interaction_id)
@@ -193,9 +208,10 @@ def get_interaction(
 )
 def get_interactions_by_twitter_user_id(
     twitter_user_id: str,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(get_api_key),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for get_interactions_by_twitter_user_id."""
     db_interactions = (
         db.query(models.Interaction)
         .join(models.Tweet)
@@ -214,8 +230,11 @@ def get_interactions_by_twitter_user_id(
     response_model=List[schemas.TwitterAccount],
 )
 def get_twitter_accounts(
-    agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    agent_id: int,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for get_twitter_accounts."""
     db_twitter_accounts = (
         db.query(models.TwitterAccount)
         .filter(models.TwitterAccount.agent_id == agent_id)
@@ -233,8 +252,11 @@ def get_twitter_accounts(
     response_model=List[schemas.Tweet],
 )
 def get_latest_tweets_by_agent_id(
-    agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    agent_id: int,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for get_latest_tweets_by_agent_id."""
     db_twitter_accounts = (
         db.query(models.TwitterAccount)
         .filter(models.TwitterAccount.agent_id == agent_id)
@@ -267,8 +289,11 @@ def get_latest_tweets_by_agent_id(
     "/api/agents/{agent_id}/interactions/", response_model=List[schemas.Interaction]
 )
 def get_interactions_by_agent_id(
-    agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    agent_id: int,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for get_interactions_by_agent_id."""
     db_interactions = (
         db.query(models.Interaction)
         .filter(models.Interaction.agent_id == agent_id)
@@ -283,8 +308,9 @@ def get_interactions_by_agent_id(
 
 @router.get("/api/active_usernames/", response_model=List[str])
 def get_active_usernames(
-    db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    db: Session = Depends(get_db), api_key: str = Depends(get_api_key)  # noqa: B008
+) -> Any:
+    """Handler for GET /api/active_usernames/."""
     db_twitter_accounts = (
         db.query(models.TwitterAccount)
         .order_by(models.TwitterAccount.created_at.desc())
@@ -308,9 +334,10 @@ def get_active_usernames(
 )
 def get_twitter_account(
     twitter_user_id: str,
-    db: Session = Depends(get_db),
-    api_key: str = Depends(get_api_key),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for get_twitter_account."""
     db_account = (
         db.query(models.TwitterAccount)
         .filter(models.TwitterAccount.twitter_user_id == twitter_user_id)
@@ -325,8 +352,9 @@ def get_twitter_account(
     "/api/active_twitter_accounts/", response_model=List[schemas.TwitterAccount]
 )
 def get_active_twitter_accounts(
-    db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    db: Session = Depends(get_db), api_key: str = Depends(get_api_key)  # noqa: B008
+) -> Any:
+    """Handler for get_active_twitter_accounts."""
     db_twitter_accounts = (
         db.query(models.TwitterAccount)
         .order_by(models.TwitterAccount.created_at.desc())
@@ -389,8 +417,9 @@ def get_active_twitter_accounts(
 # AgentType CRUD operations
 @router.post("/api/agent-types/", response_model=schemas.AgentType)
 def create_agent_type(
-    agent_type: schemas.AgentTypeCreate, db: Session = Depends(get_db)
-):
+    agent_type: schemas.AgentTypeCreate, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for POST /api/agent-types/."""
 
     db_agent_type = models.AgentType(
         type_name=agent_type.type_name, description=agent_type.description
@@ -402,13 +431,19 @@ def create_agent_type(
 
 
 @router.get("/api/agent-types/", response_model=List[schemas.AgentType])
-def read_agent_types(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def read_agent_types(
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for GET /api/agent-types/."""
     agent_types = db.query(models.AgentType).offset(skip).limit(limit).all()
     return agent_types
 
 
 @router.get("/api/agent-types/name/{type_name}", response_model=schemas.AgentType)
-def read_agent_type_by_name(type_name: str, db: Session = Depends(get_db)):
+def read_agent_type_by_name(
+    type_name: str, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for GET /api/agent-types/name/{type_name}."""
     db_agent_type = (
         db.query(models.AgentType)
         .filter(func.lower(models.AgentType.type_name) == type_name.lower())
@@ -422,7 +457,10 @@ def read_agent_type_by_name(type_name: str, db: Session = Depends(get_db)):
 @router.get(
     "/api/attributes/name/{attr_name}", response_model=schemas.AttributeDefinition
 )
-def read_attribute_definition_by_name(attr_name: str, db: Session = Depends(get_db)):
+def read_attribute_definition_by_name(
+    attr_name: str, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for read_attribute_definition_by_name."""
     db_attr_def = (
         db.query(models.AttributeDefinition)
         .filter(func.lower(models.AttributeDefinition.attr_name) == attr_name.lower())
@@ -438,8 +476,9 @@ def read_attribute_definition_by_name(attr_name: str, db: Session = Depends(get_
     response_model=schemas.AgentAttribute,
 )
 def read_agent_attribute_by_agent_and_def(
-    agent_id: int, attr_def_id: int, db: Session = Depends(get_db)
-):
+    agent_id: int, attr_def_id: int, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for read_agent_attribute_by_agent_and_def."""
     db_agent_attr = (
         db.query(models.AgentAttribute)
         .filter(
@@ -458,8 +497,11 @@ def read_agent_attribute_by_agent_and_def(
     response_model=List[schemas.AgentAttribute],
 )
 def read_all_attributes_of_agent(
-    agent_id: int, db: Session = Depends(get_db), api_key: str = Depends(get_api_key)
-):
+    agent_id: int,
+    db: Session = Depends(get_db),  # noqa: B008
+    api_key: str = Depends(get_api_key),  # noqa: B008
+) -> Any:
+    """Handler for read_all_attributes_of_agent."""
     # Verify agent exists in AgentRegistry
     db_agent = (
         db.query(models.AgentRegistry)
@@ -485,7 +527,8 @@ def read_all_attributes_of_agent(
 
 
 @router.get("/api/agent-types/{type_id}", response_model=schemas.AgentType)
-def read_agent_type(type_id: int, db: Session = Depends(get_db)):
+def read_agent_type(type_id: int, db: Session = Depends(get_db)) -> Any:  # noqa: B008
+    """Handler for GET /api/agent-types/{type_id}."""
     db_agent_type = (
         db.query(models.AgentType).filter(models.AgentType.type_id == type_id).first()
     )
@@ -498,9 +541,10 @@ def read_agent_type(type_id: int, db: Session = Depends(get_db)):
 def update_agent_type(
     type_id: int,
     agent_type: schemas.AgentTypeUpdate,
-    db: Session = Depends(get_db),
-    agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for PUT /api/agent-types/{type_id}."""
     db_agent_type = (
         db.query(models.AgentType).filter(models.AgentType.type_id == type_id).first()
     )
@@ -518,9 +562,10 @@ def update_agent_type(
 @router.delete("/api/agent-types/{type_id}", response_model=schemas.AgentType)
 def delete_agent_type(
     type_id: int,
-    db: Session = Depends(get_db),
-    agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for DELETE /api/agent-types/{type_id}."""
     db_agent_type = (
         db.query(models.AgentType).filter(models.AgentType.type_id == type_id).first()
     )
@@ -539,9 +584,10 @@ def delete_agent_type(
 def create_attribute_definition(
     type_id: int,
     attr_def: schemas.AttributeDefinitionCreate,
-    db: Session = Depends(get_db),
-    agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for create_attribute_definition."""
     # Verify agent type exists
     db_agent_type = (
         db.query(models.AgentType).filter(models.AgentType.type_id == type_id).first()
@@ -568,8 +614,12 @@ def create_attribute_definition(
     response_model=List[schemas.AttributeDefinition],
 )
 def read_attribute_definitions_by_type(
-    type_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+    type_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> Any:
+    """Handler for read_attribute_definitions_by_type."""
     # Verify agent type exists
     db_agent_type = (
         db.query(models.AgentType).filter(models.AgentType.type_id == type_id).first()
@@ -590,7 +640,10 @@ def read_attribute_definitions_by_type(
 
 
 @router.get("/api/attributes/{attr_def_id}", response_model=schemas.AttributeDefinition)
-def read_attribute_definition(attr_def_id: int, db: Session = Depends(get_db)):
+def read_attribute_definition(
+    attr_def_id: int, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for GET /api/attributes/{attr_def_id}."""
     db_attr_def = (
         db.query(models.AttributeDefinition)
         .filter(models.AttributeDefinition.attr_def_id == attr_def_id)
@@ -605,9 +658,10 @@ def read_attribute_definition(attr_def_id: int, db: Session = Depends(get_db)):
 def update_attribute_definition(
     attr_def_id: int,
     attr_def: schemas.AttributeDefinitionUpdate,
-    db: Session = Depends(get_db),
-    agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for PUT /api/attributes/{attr_def_id}."""
     db_attr_def = (
         db.query(models.AttributeDefinition)
         .filter(models.AttributeDefinition.attr_def_id == attr_def_id)
@@ -629,9 +683,10 @@ def update_attribute_definition(
 )
 def delete_attribute_definition(
     attr_def_id: int,
-    db: Session = Depends(get_db),
-    agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for delete_attribute_definition."""
     db_attr_def = (
         db.query(models.AttributeDefinition)
         .filter(models.AttributeDefinition.attr_def_id == attr_def_id)
@@ -648,8 +703,10 @@ def delete_attribute_definition(
 # AgentRegistry CRUD operations
 @router.post("/api/agent-registry/", response_model=schemas.AgentRegistry)
 def create_agent_registry(
-    agent_registry: schemas.AgentRegistryCreate, db: Session = Depends(get_db)
-):
+    agent_registry: schemas.AgentRegistryCreate,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> Any:
+    """Handler for POST /api/agent-registry/."""
     # Verify agent type exists
     db_agent_type = (
         db.query(models.AgentType)
@@ -684,14 +741,18 @@ def create_agent_registry(
 
 @router.get("/api/agent-registry/", response_model=List[schemas.AgentRegistry])
 def read_agent_registries(
-    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for GET /api/agent-registry/."""
     agent_registries = db.query(models.AgentRegistry).offset(skip).limit(limit).all()
     return agent_registries
 
 
 @router.get("/api/agent-registry/{agent_id}", response_model=schemas.AgentRegistry)
-def read_agent_registry(agent_id: int, db: Session = Depends(get_db)):
+def read_agent_registry(
+    agent_id: int, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for GET /api/agent-registry/{agent_id}."""
     db_agent_registry = (
         db.query(models.AgentRegistry)
         .filter(models.AgentRegistry.agent_id == agent_id)
@@ -705,7 +766,10 @@ def read_agent_registry(agent_id: int, db: Session = Depends(get_db)):
 @router.get(
     "/api/agent-registry/address/{eth_address}", response_model=schemas.AgentRegistry
 )
-def read_agent_registry_by_address(eth_address: str, db: Session = Depends(get_db)):
+def read_agent_registry_by_address(
+    eth_address: str, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for read_agent_registry_by_address."""
     db_agent_registry = (
         db.query(models.AgentRegistry)
         .filter(models.AgentRegistry.eth_address == eth_address)
@@ -720,9 +784,10 @@ def read_agent_registry_by_address(eth_address: str, db: Session = Depends(get_d
 def update_agent_registry(
     agent_id: int,
     agent_registry: schemas.AgentRegistryUpdate,
-    db: Session = Depends(get_db),
-    auth_agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    auth_agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for PUT /api/agent-registry/{agent_id}."""
     # Verify that the authenticated agent is updating its own data
     if auth_agent_id != agent_id:
         raise HTTPException(
@@ -749,9 +814,10 @@ def update_agent_registry(
 @router.delete("/api/agent-registry/{agent_id}", response_model=schemas.AgentRegistry)
 def delete_agent_registry(
     agent_id: int,
-    db: Session = Depends(get_db),
-    auth_agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    auth_agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for DELETE /api/agent-registry/{agent_id}."""
     # Verify that the authenticated agent is deleting its own data
     if auth_agent_id != agent_id:
         raise HTTPException(
@@ -775,8 +841,12 @@ def delete_agent_registry(
     "/api/agent-types/{type_id}/agents/", response_model=List[schemas.AgentRegistry]
 )
 def read_agents_by_type(
-    type_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+    type_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> Any:
+    """Handler for read_agents_by_type."""
     # Verify agent type exists
     db_agent_type = (
         db.query(models.AgentType).filter(models.AgentType.type_id == type_id).first()
@@ -803,9 +873,10 @@ def read_agents_by_type(
 def create_agent_attribute(
     agent_id: int,
     agent_attr: schemas.AgentAttributeCreate,
-    db: Session = Depends(get_db),
-    auth_agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    auth_agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for create_agent_attribute."""
     print(f"Attempting to create an attribute for agent_id: {agent_id}")
     # Verify that the authenticated agent is creating its own attribute
     if auth_agent_id != agent_id:
@@ -862,8 +933,12 @@ def create_agent_attribute(
     "/api/agents/{agent_id}/attributes/", response_model=List[schemas.AgentAttribute]
 )
 def read_agent_attributes(
-    agent_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
-):
+    agent_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> Any:
+    """Handler for read_agent_attributes."""
     # Verify agent exists in AgentRegistry
     db_agent = (
         db.query(models.AgentRegistry)
@@ -888,7 +963,10 @@ def read_agent_attributes(
 @router.get(
     "/api/agent-attributes/{attribute_id}", response_model=schemas.AgentAttribute
 )
-def read_agent_attribute(attribute_id: int, db: Session = Depends(get_db)):
+def read_agent_attribute(
+    attribute_id: int, db: Session = Depends(get_db)  # noqa: B008
+) -> Any:
+    """Handler for read_agent_attribute."""
     db_agent_attr = (
         db.query(models.AgentAttribute)
         .filter(models.AgentAttribute.attribute_id == attribute_id)
@@ -908,8 +986,8 @@ def read_attribute_values_by_type(
     attr_def_id: int,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+) -> Any:
     """Get all attribute values for a specific attr definition across all agents of a type."""
     # Verify agent type exists
     db_agent_type = (
@@ -966,9 +1044,10 @@ def read_attribute_values_by_type(
 def update_agent_attribute(
     attribute_id: int,
     agent_attr: schemas.AgentAttributeUpdate,
-    db: Session = Depends(get_db),
-    auth_agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    auth_agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for update_agent_attribute."""
     # Get the attribute
     db_agent_attr = (
         db.query(models.AgentAttribute)
@@ -999,9 +1078,10 @@ def update_agent_attribute(
 )
 def delete_agent_attribute(
     attribute_id: int,
-    db: Session = Depends(get_db),
-    auth_agent_id: int = Depends(verify_agent_signature),
-):
+    db: Session = Depends(get_db),  # noqa: B008
+    auth_agent_id: int = Depends(verify_agent_signature),  # noqa: B008
+) -> Any:
+    """Handler for delete_agent_attribute."""
     # Get the attribute
     db_agent_attr = (
         db.query(models.AgentAttribute)

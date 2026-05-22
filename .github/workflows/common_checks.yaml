@@ -31,25 +31,18 @@ jobs:
   linter_checks:
     name: Linter checks
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        tox-env:
-          - black-check
-          - isort-check
-          - flake8
-          - mypy
-          - pylint
-          - bandit
-          - safety
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
-      - name: Install tox via tomte (+ tox-uv for fast venv creation)
-        run: pip install tomte[tox,cli]==0.6.1 tox-uv
-      - name: Run ${{ matrix.tox-env }}
-        run: tox -e ${{ matrix.tox-env }}
+          python-version: "3.10"
+      - name: Install tomte
+        run: pip install 'tomte[cli, tests]==0.7.0' tox-uv
+      - name: Code checks
+        run: tomte tox -p -e black-check -e isort-check -e flake8 -e mypy -e pylint
+      - name: Security checks
+        run: tomte tox -p -e bandit -e safety
 
   test:
     name: Tests (Python ${{ matrix.python-version }}, ${{ matrix.os }})
@@ -65,17 +58,22 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install tox + tox-uv
-        run: pip install tox tox-uv
-      - if: matrix.os == 'ubuntu-24.04'
-        name: Run tests (Linux)
-        run: tox -e py${{ matrix.python-version }}-linux
-      - if: matrix.os == 'macos-15'
-        name: Run tests (macOS)
-        run: tox -e py${{ matrix.python-version }}-darwin
-      - if: matrix.os == 'windows-2025'
-        name: Run tests (Windows)
-        run: tox -e py${{ matrix.python-version }}-win
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          version: "0.11.15"
+      - name: Install project dependencies
+        # `--no-default-groups --group test` installs runtime + test
+        # deps only (pytest, httpx, anyio[trio], pytest-anyio). The
+        # `dev` group adds the tomte/tox-uv lint toolchain which the
+        # test matrix doesn't need — keeping it out shrinks the
+        # per-cell install across 15 (3 OS x 5 Python) cells.
+        #
+        # Pin uv's interpreter to the matrix Python so a different
+        # `>=3.10,<3.15`-compatible Python on PATH can't silently
+        # collapse the cross-version matrix to a single interpreter.
+        run: uv sync --no-default-groups --group test --frozen --python ${{ matrix.python-version }}
+      - name: Run tests
+        run: uv run --python ${{ matrix.python-version }} pytest tests/
 
   all_checks_passed:
     name: All checks passed

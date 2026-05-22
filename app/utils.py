@@ -1,3 +1,5 @@
+"""API key generation and ECDSA signature verification helpers."""
+
 import secrets
 import time
 
@@ -6,7 +8,8 @@ from eth_account.messages import encode_defunct
 from fastapi import HTTPException
 
 
-def generate_api_key():
+def generate_api_key() -> str:
+    """Return a URL-safe random 32-byte API key."""
     return secrets.token_urlsafe(32)
 
 
@@ -26,10 +29,14 @@ def verify_signature(message: str, signature: str, address: str) -> bool:
         # Create a signable message from the text
         signable_message = encode_defunct(text=message)
 
-        # Recover the address from the signature
-        # Account.recover_message is a static method, not an instance method
-        recovered_address = Account.recover_message(
-            signable_message, signature=signature
+        # Recover the address from the signature.
+        # `Account.recover_message` is a @combomethod (callable as class or
+        # instance method); pylint doesn't recognize the descriptor and reports
+        # E1120 thinking `self` is missing.
+        recovered_address = (
+            Account.recover_message(  # pylint: disable=no-value-for-parameter
+                signable_message, signature=signature
+            )
         )
 
         # Compare the recovered address with the provided address

@@ -1,3 +1,5 @@
+"""FastAPI dependency callables for authentication and authorization."""
+
 from fastapi import Depends, HTTPException, Security
 from fastapi.security.api_key import APIKeyHeader
 from sqlalchemy.orm import Session
@@ -12,8 +14,10 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 
 async def get_api_key(
-    api_key_header: str = Security(api_key_header), db: Session = Depends(get_db)
-):
+    api_key_header: str = Security(api_key_header),  # noqa: B008
+    db: Session = Depends(get_db),  # noqa: B008
+) -> str:
+    """Validate the `access-token` header against the APIKey table and return its value."""
     if api_key_header:
         db_api_key = (
             db.query(models.APIKey).filter(models.APIKey.key == api_key_header).first()
@@ -26,7 +30,10 @@ async def get_api_key(
     )
 
 
-async def verify_agent_signature(auth: SignatureAuth, db: Session = Depends(get_db)):
+async def verify_agent_signature(
+    auth: SignatureAuth,
+    db: Session = Depends(get_db),  # noqa: B008
+) -> int:
     """
     Verify the ECDSA signature provided in the request body.
 
