@@ -3,7 +3,7 @@ FROM python:3.12-slim
 # Install uv (binary release, no Python deps needed). Pinned by digest
 # in addition to tag — the tag is mutable; the digest gives a stable
 # guarantee that every build pulls the same uv layer.
-COPY --from=ghcr.io/astral-sh/uv:0.11.15@sha256:e590846f4776907b254ac0f44b5b380347af5d90d668138ca7938d1b0c2f98d3 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.4@sha256:9f130421e930bfbdc563c00740466603f8723158e90297d07957c2294640262b /uv /uvx /usr/local/bin/
 
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1
